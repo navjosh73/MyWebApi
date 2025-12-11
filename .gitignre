@@ -1,0 +1,6 @@
+builds/           # Ignores "builds" folder
+temp/             # Ignores "temp" folder
+bin/
+Debug/
+
+

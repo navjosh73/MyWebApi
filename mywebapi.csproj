@@ -4,6 +4,9 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+  <ContainerFamily>debian</ContainerFamily>
+  <ContainerRuntimeIdentifier>debian-x64</ContainerRuntimeIdentifier>
+  <ContainerGenerateDockerfile>true</ContainerGenerateDockerfile>
   </PropertyGroup>
 
   <ItemGroup>

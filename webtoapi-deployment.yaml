@@ -1,0 +1,37 @@
+# 1. Deployment: Defines the webtoapi container configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webtoapi-deployment
+  labels:
+    app: webtoapi
+spec:
+  replicas: 1 # Starts one copy of your application
+  selector:
+    matchLabels:
+      app: webtoapi
+  template:
+    metadata:
+      labels:
+        app: webtoapi
+    spec:
+      containers:
+      - name: webtoapi-container
+        image: webtoapi:latest      # Your correctly tagged image
+        imagePullPolicy: Never      # Crucial: Tells K8s the image is local
+        ports:
+        - containerPort: 8080       # <<< UPDATE THIS WITH YOUR ACTUAL APPLICATION PORT
+---
+# 2. Service: Exposes the webtoapi application
+apiVersion: v1
+kind: Service
+metadata:
+  name: webtoapi-service
+spec:
+  type: NodePort                    # Allows external access via Minikube's IP
+  selector:
+    app: webtoapi
+  ports:
+    - protocol: TCP
+      port: 80                      # The standard port the Service listens on
+      targetPort: 8080              # <<< UPDATE THIS TO MATCH YOUR APPLICATION PORT (5010)

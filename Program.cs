@@ -31,24 +31,34 @@ app.MapGet("/weatherforecast", () => "Token is Blank")
     .WithName("GetToken");
 
 // New endpoint: accepts a token query parameter, authenticates it, then calls WebToAuthorise if valid.
-app.MapGet("/get-weather", async (string? token) =>
+app.MapGet("/get-weather", async (ILogger<Program> logger, string? token) =>
 {
+    var handler = new HttpClientHandler();
+    handler.ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) => true;
+    using var http = new HttpClient(handler);
+    
+    var baseUrl = "http://webtoauthor-service:80";
+    var url = $"{baseUrl}/authorise?token={Uri.EscapeDataString(token ?? "")}";
+    logger.LogInformation(url);
+    var response = await http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+    var text = await response.Content.ReadAsStringAsync();
+    logger.LogInformation(text);
     // Validate the token (hardcoded check)
-    if (string.IsNullOrWhiteSpace(token) || token != "valid-token-123")
+    if (text != "Authorisation successful")
     {
         app.Logger.LogWarning("authentication fail");
         return Results.Unauthorized();
     }
 
     // Token is valid, call WebToAuthorise's /weatherforecast endpoint
-    using var http = new HttpClient();
-    var url = "http://localhost:5000/weatherforecast";
+    var url1 = "http://webtoauthor-service:80/weatherforecast";
     app.Logger.LogInformation("authentication success");
     try
     {
-        var response = await http.GetAsync(url);
-        response.EnsureSuccessStatusCode();
-        var content = await response.Content.ReadAsStringAsync();
+        var response1 = await http.GetAsync(url1);
+        response1.EnsureSuccessStatusCode();
+        var content = await response1.Content.ReadAsStringAsync();
         app.Logger.LogInformation("Received response from WebToAuthorise: {Length} bytes", content?.Length ?? 0);
         return Results.Ok(content);
     }
